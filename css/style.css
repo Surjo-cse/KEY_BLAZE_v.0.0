@@ -1,0 +1,282 @@
+/* ==========================================================================
+   KeyBlaze - style.css
+   Styles for the HTML overlays (menu, result, pause, progress).
+   The game itself is drawn on the canvas, so this file is small.
+
+   All sizes use "em". main.js sets the font-size of #stage so that the whole
+   interface scales together with the canvas on any screen size.
+   ========================================================================== */
+
+:root {
+  --navy: #0B1020;
+  --card: #151C36;
+  --muted: #AEB7D6;
+  --cyan: #22D3EE;
+  --pink: #F472B6;
+  --yellow: #FACC15;
+  --green: #4ADE80;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #05070f;
+  color: #fff;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Stage: keeps the 16:10 shape (size is set from JS) ---------- */
+#stage {
+  position: relative;
+  width: 960px;
+  height: 600px;
+  font-size: 16px;
+  background: var(--navy);
+  box-shadow: 0 0 60px rgba(124, 58, 237, .35);
+  overflow: hidden;
+}
+
+#game {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ---------- Overlays ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.overlay.dim { background: rgba(5, 8, 20, .65); }
+.hidden { display: none !important; }
+
+/* ---------- Menu ---------- */
+.menu-inner { width: 92%; }
+
+.logo {
+  margin: 0;
+  font-size: 4.6em;
+  line-height: 1;
+  letter-spacing: -.02em;
+  /* CSS animation: the glow slowly pulses */
+  animation: glow 3s ease-in-out infinite;
+}
+.logo .c1 { color: var(--cyan); }
+.logo .c2 { color: var(--pink); }
+
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 .3em rgba(34, 211, 238, .35), 0 0 .8em rgba(244, 114, 182, .2); }
+  50%      { text-shadow: 0 0 .5em rgba(34, 211, 238, .7),  0 0 1.2em rgba(244, 114, 182, .5); }
+}
+
+.tag { margin: .4em 0 1.2em; color: var(--muted); font-size: 1.1em; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .9em;
+  max-width: 52em;
+  margin: 0 auto;
+}
+
+.card {
+  --c: var(--cyan);
+  font: inherit;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  background: rgba(21, 28, 54, .88);
+  border: .12em solid var(--c);
+  border-top-width: .45em;
+  border-radius: .9em;
+  padding: .9em 1em 1em;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card b { display: block; color: var(--c); font-size: 1.25em; margin-bottom: .25em; }
+.card small { color: #D5DBF0; font-size: .92em; }
+.card:hover, .card:focus-visible {
+  transform: translateY(-.25em) scale(1.03);
+  box-shadow: 0 .6em 1.6em rgba(0, 0, 0, .5), 0 0 1.2em var(--c);
+  outline: none;
+}
+
+.settings {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.2em;
+  color: var(--muted);
+}
+.settings label { display: flex; align-items: center; gap: .5em; }
+
+select {
+  font: inherit;
+  color: #fff;
+  background: var(--card);
+  border: .1em solid #3a4678;
+  border-radius: .5em;
+  padding: .35em .6em;
+}
+
+.hint { color: var(--muted); font-size: .9em; margin: 1em 0 0; }
+kbd {
+  background: var(--card);
+  border: .08em solid #3a4678;
+  border-radius: .3em;
+  padding: .05em .4em;
+}
+
+/* ---------- Buttons ---------- */
+button { font: inherit; cursor: pointer; }
+.primary, .ghost {
+  border-radius: 2em;
+  padding: .55em 1.6em;
+  font-weight: 700;
+  border: .12em solid transparent;
+  transition: transform .15s ease, filter .15s ease;
+}
+.primary { background: linear-gradient(90deg, #7C3AED, #EC4899); color: #fff; }
+.ghost   { background: transparent; color: #fff; border-color: #4a5690; }
+.primary:hover, .ghost:hover { transform: translateY(-.1em) scale(1.04); filter: brightness(1.15); }
+
+/* ---------- Panels (result / pause / progress) ---------- */
+.panel {
+  background: rgba(14, 20, 44, .94);
+  border: .12em solid #3a4678;
+  border-radius: 1.1em;
+  padding: 1.4em 1.8em;
+  box-shadow: 0 1em 3em rgba(0, 0, 0, .6);
+  /* CSS animation: the panel pops in */
+  animation: pop .35s cubic-bezier(.2, 1.4, .4, 1);
+}
+.panel.wide { width: 86%; }
+.panel h2 { margin: 0; font-size: 2em; }
+.muted { color: var(--muted); }
+.small { font-size: .85em; margin: .2em 0 .4em; }
+
+@keyframes pop {
+  from { transform: scale(.85); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.result-grid, .prog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2em;
+  align-items: center;
+  margin: .8em 0 1em;
+}
+.prog-grid .span2 { grid-column: span 2; }
+
+.rank {
+  display: inline-block;
+  font-size: 2.1em;
+  font-weight: 800;
+  padding: .1em .7em;
+  border-radius: .6em;
+  background: linear-gradient(90deg, var(--yellow), var(--pink));
+  color: var(--navy);
+  margin-bottom: .5em;
+}
+
+.statgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .6em; }
+.statgrid div {
+  background: var(--card);
+  border-radius: .7em;
+  padding: .5em;
+}
+.statgrid b    { display: block; font-size: 1.8em; color: var(--cyan); }
+.statgrid span { color: var(--muted); font-size: .85em; }
+
+.best { color: var(--yellow); font-weight: 700; min-height: 1.4em; margin: .6em 0 0; }
+
+canvas#heat, canvas#heatAll, canvas#chartWpm, canvas#chartAcc {
+  width: 100%;
+  max-width: 24em;
+  height: auto;
+  background: rgba(0, 0, 0, .25);
+  border-radius: .7em;
+}
+.prog-grid canvas#heatAll { max-width: 20em; }
+
+.btns { display: flex; gap: .8em; justify-content: center; margin-top: .6em; }
+
+/* ---------- Sign in / sign up ---------- */
+.authpanel { width: 23em; padding: 1.2em 1.6em 1.3em; }
+.logo.small { font-size: 2.6em; animation: none; }
+
+.tabs {
+  display: flex;
+  margin: .8em 0 1em;
+  background: var(--card);
+  border-radius: 2em;
+  padding: .2em;
+}
+.tab {
+  flex: 1;
+  border: 0;
+  border-radius: 2em;
+  padding: .45em 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+}
+.tab.active { background: linear-gradient(90deg, #7C3AED, #EC4899); color: #fff; }
+
+#authForm input {
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: #fff;
+  background: var(--card);
+  border: .1em solid #3a4678;
+  border-radius: .6em;
+  padding: .6em .8em;
+  margin-bottom: .55em;
+}
+#authForm input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 .15em rgba(34, 211, 238, .25); }
+
+.err { min-height: 1.3em; margin: .1em 0 .5em; color: #F87171; font-size: .9em; }
+.err.ok { color: var(--green); }
+
+.full { width: 100%; }
+.authpanel .ghost.full { margin-top: .6em; }
+.primary:disabled, .ghost:disabled { opacity: .6; cursor: wait; transform: none; }
+
+.link {
+  background: none;
+  border: 0;
+  color: var(--cyan);
+  text-decoration: underline;
+  padding: .3em;
+  font-size: .9em;
+}
+
+/* ---------- User bar on the menu ---------- */
+.userbar {
+  position: absolute;
+  top: .8em;
+  right: 1em;
+  display: flex;
+  align-items: center;
+  gap: .8em;
+  color: var(--muted);
+}
+.userbar b { color: #fff; }
+.sm { padding: .25em 1em; font-size: .9em; }
