@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!--
+  KeyBlaze - Typing Practice Arcade
+  Computer Graphics and Animation course project
+
+  This is the only HTML page of the game. It contains:
+    1. The <canvas> where every game scene is drawn
+    2. HTML overlays (menu, result, pause, progress) placed on top of the canvas
+    3. The <script> tags that load the game code (plain scripts, NOT ES modules,
+       so the game also works when you simply double-click index.html)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KeyBlaze - Typing Practice Arcade</title>
+  <meta name="description" content="KeyBlaze: learn to type faster by playing arcade typing games. Track your WPM and accuracy.">
+  <!-- small inline icon so the browser does not ask for favicon.ico -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2322D3EE'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='bold' text-anchor='middle' font-family='Arial' fill='%230B1020'%3EK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- #stage keeps a fixed 16:10 shape and scales to the browser window -->
+  <div id="stage">
+
+    <!-- The game canvas. Logical size is 960 x 600 (CSS scales it) -->
+    <canvas id="game" width="960" height="600"></canvas>
+
+    <!-- ================= LOADING (shown until the login system is ready) ================= -->
+    <section id="boot" class="overlay"><p class="muted">Loading...</p></section>
+
+    <!-- ================= SIGN IN / SIGN UP ================= -->
+    <section id="auth" class="overlay hidden">
+      <div class="panel authpanel">
+        <h1 class="logo small"><span class="c1">Key</span><span class="c2">Blaze</span></h1>
+        <p class="muted">Sign in to save your progress</p>
+
+        <div class="tabs">
+          <button type="button" id="tabIn" class="tab active">Sign in</button>
+          <button type="button" id="tabUp" class="tab">Sign up</button>
+        </div>
+
+        <form id="authForm" novalidate>
+          <input id="aName"  type="text"     placeholder="Your name" autocomplete="name" maxlength="30" class="hidden">
+          <input id="aEmail" type="email"    placeholder="Email" autocomplete="email">
+          <input id="aPass"  type="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
+          <input id="aPass2" type="password" placeholder="Confirm password" autocomplete="new-password" class="hidden">
+          <p id="authErr" class="err" role="alert"></p>
+          <button id="authSubmit" class="primary full" type="submit">Sign in</button>
+        </form>
+
+        <button type="button" id="btnGoogle" class="ghost full hidden">Continue with Google</button>
+        <button type="button" id="btnForgot" class="link hidden">Forgot password?</button>
+        <p id="authNote" class="muted small"></p>
+        <button type="button" id="btnGuest" class="link hidden">Continue as guest</button>
+      </div>
+    </section>
+
+    <!-- ================= MAIN MENU ================= -->
+    <section id="menu" class="overlay hidden">
+      <!-- who is logged in + log out -->
+      <div id="userbar" class="userbar hidden">
+        <span>Hi, <b id="userName"></b></span>
+        <span id="syncStatus" class="muted small"></span>
+        <button type="button" id="btnLogout" class="ghost sm">Log out</button>
+      </div>
+      <div class="menu-inner">
+        <h1 class="logo"><span class="c1">Key</span><span class="c2">Blaze</span></h1>
+        <p class="tag">Typing Practice Arcade &mdash; learn to type by playing</p>
+
+        <!-- One card per game mode. data-mode must match a key in KB.modes -->
+        <div class="cards">
+          <button class="card" data-mode="lesson"    style="--c:#4ADE80"><b>Lesson Lab</b><small>Learn finger placement step by step</small></button>
+          <button class="card" data-mode="wordrain"  style="--c:#22D3EE"><b>Word Rain</b><small>Type falling words to save the city</small></button>
+          <button class="card" data-mode="asteroid"  style="--c:#A78BFA"><b>Asteroid Blaster</b><small>Fire lasers by typing words</small></button>
+          <button class="card" data-mode="racer"     style="--c:#FB923C"><b>Turbo Racer</b><small>Your typing speed is your car speed</small></button>
+          <button class="card" data-mode="boss"      style="--c:#F472B6"><b>Boss Battle</b><small>Type sentences to beat the robot</small></button>
+          <button class="card" data-mode="challenge" style="--c:#FACC15"><b>Daily Challenge</b><small>Same text for everyone today</small></button>
+        </div>
+
+        <div class="settings">
+          <label>Difficulty
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+          <label>Lesson
+            <select id="lesson"></select> <!-- filled by main.js -->
+          </label>
+          <button id="btnProgress" class="ghost">Progress</button>
+          <button id="btnSound" class="ghost">Sound: On</button>
+        </div>
+        <p class="hint">Press <kbd>Esc</kbd> during a game to pause</p>
+      </div>
+    </section>
+
+    <!-- ================= RESULT SCREEN ================= -->
+    <section id="result" class="overlay hidden">
+      <div class="panel wide">
+        <h2 id="resTitle">Mission Complete</h2>
+        <p id="resMode" class="muted"></p>
+        <div class="result-grid">
+          <div>
+            <div id="resRank" class="rank">Pro</div>
+            <div class="statgrid">
+              <div><b id="rWpm">0</b><span>WPM</span></div>
+              <div><b id="rAcc">0</b><span>Accuracy</span></div>
+              <div><b id="rScore">0</b><span>Score</span></div>
+              <div><b id="rCombo">0</b><span>Best combo</span></div>
+            </div>
+            <p id="resBest" class="best"></p>
+          </div>
+          <div>
+            <p class="muted small">Weak-key heatmap (red = more mistakes)</p>
+            <canvas id="heat" width="440" height="204"></canvas>
+          </div>
+        </div>
+        <div class="btns">
+          <button id="btnAgain" class="primary">Play again</button>
+          <button id="btnMenu" class="ghost">Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAUSE ================= -->
+    <section id="pause" class="overlay hidden dim">
+      <div class="panel">
+        <h2>Paused</h2>
+        <div class="btns">
+          <button id="btnResume" class="primary">Resume</button>
+          <button id="btnQuit" class="ghost">Quit to menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PROGRESS DASHBOARD ================= -->
+    <section id="progress" class="overlay hidden">
+      <div class="panel wide">
+        <h2>Your Progress</h2>
+        <p id="progSummary" class="muted"></p>
+        <div class="prog-grid">
+          <div><p class="small muted">Speed per session (WPM)</p><canvas id="chartWpm" width="420" height="150"></canvas></div>
+          <div><p class="small muted">Accuracy per session (%)</p><canvas id="chartAcc" width="420" height="150"></canvas></div>
+          <div class="span2"><p class="small muted">All-time weak keys</p><canvas id="heatAll" width="440" height="204"></canvas></div>
+        </div>
+        <div class="btns">
+          <button id="btnProgClose" class="primary">Back</button>
+          <button id="btnProgReset" class="ghost">Reset data</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Load order matters: each file only uses files loaded before it -->
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/words.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/config.js"></script>   <!-- edit this one to turn on Firebase accounts -->
+  <script src="js/auth.js"></script>
+  <script src="js/authui.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/modes/lesson.js"></script>
+  <script src="js/modes/wordrain.js"></script>
+  <script src="js/modes/asteroid.js"></script>
+  <script src="js/modes/racer.js"></script>
+  <script src="js/modes/boss.js"></script>
+  <script src="js/modes/challenge.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# Netlify settings for KeyBlaze.
+# The game is a plain static site, so there is no build command:
+# Netlify just publishes this folder as it is.
+
+[build]
+  publish = "."
+
+# A few safe default headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+# Always load the newest code files after you redeploy
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

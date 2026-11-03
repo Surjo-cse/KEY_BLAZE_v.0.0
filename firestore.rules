@@ -1,0 +1,26 @@
+// Firestore security rules for KeyBlaze.
+// Paste these into: Firebase console -> Firestore Database -> Rules -> Publish
+//
+// Meaning: a signed-in user can read and write ONLY their own data
+//   users/{their uid}            profile + totals
+//   users/{their uid}/sessions   their finished games
+// Nobody else (and nobody who is not signed in) can touch it.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /sessions/{sessionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // everything else is closed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
